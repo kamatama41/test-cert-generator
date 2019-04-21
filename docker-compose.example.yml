@@ -1,0 +1,11 @@
+version: '3.2'
+
+services:
+  cert-generator:
+    image: kamatama41/test-cert-generator
+    volumes:
+      - ./work:/root/work
+    environment:
+      PASSWORD: myPassword
+      COMMON_NAME_SERVER: mydomain.com
+      COMMON_NAME_CLIENT: myclient
