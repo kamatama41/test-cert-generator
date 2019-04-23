@@ -3,9 +3,12 @@ version: '3.2'
 services:
   cert-generator:
     image: kamatama41/test-cert-generator
+    # build: {context: .}
     volumes:
-      - ./work:/root/work
+      - ./tmp/work:/root/work
+      - ./tmp/ca:/root/ca
     environment:
-      PASSWORD: myPassword
-      COMMON_NAME_SERVER: mydomain.com
-      COMMON_NAME_CLIENT: myclient
+      SERVER_COMMON_NAME: mydomain.com
+      SERVER_P12_PASSWORD: abcdefg
+      CLIENT_COMMON_NAME: myclient
+      CLIENT_P12_PASSWORD: hijklmn

@@ -5,11 +5,15 @@
 
 set -eu
 
-password=${PASSWORD:-passw0rd}
-common_name_server=${COMMON_NAME_SERVER:-example.com}
-common_name_client=${COMMON_NAME_CLIENT:-client}
+private_key_password=${PRIVATE_KEY_PASSWORD:-p@ssw0rd}
+cert_p12_password=${CERT_P12_PASSWORD:-p@ssw0rd}
+server_p12_password=${SERVER_P12_PASSWORD:-p@ssw0rd}
+client_p12_password=${CLIENT_P12_PASSWORD:-p@ssw0rd}
+server_common_name=${SERVER_COMMON_NAME:-example.com}
+client_common_name=${CLIENT_COMMON_NAME:-client}
 
-rm -rf /root/ca && mkdir -p /root/ca/intermediate
+rm -rf /root/ca/* && mkdir -p /root/ca/intermediate
+rm -rf /root/work/*
 cd /root/ca
 cp /root/openssl_ca.cnf openssl.cnf
 cp /root/openssl_intermediate.cnf intermediate/openssl.cnf
@@ -20,8 +24,8 @@ chmod 700 private
 touch index.txt
 echo 1000 > serial
 
-openssl genrsa -passout pass:${password} -aes256 -out private/ca.key.pem 4096
-openssl req -passin pass:${password} -config openssl.cnf \
+openssl genrsa -passout pass:${private_key_password} -aes256 -out private/ca.key.pem 4096
+openssl req -passin pass:${private_key_password} -config openssl.cnf \
   -key private/ca.key.pem -new -x509 -days 7300 -sha256 \
   -extensions v3_ca -out certs/ca.cert.pem <<INPUT
 GB
@@ -43,11 +47,11 @@ echo 1000 > serial
 echo 1000 > /root/ca/intermediate/crlnumber
 
 cd /root/ca
-openssl genrsa -passout pass:${password} -aes256 -out intermediate/private/intermediate.key.pem 4096
+openssl genrsa -passout pass:${private_key_password} -aes256 -out intermediate/private/intermediate.key.pem 4096
 chmod 400 intermediate/private/intermediate.key.pem
 
 cd /root/ca
-openssl req -passin pass:${password} -config intermediate/openssl.cnf \
+openssl req -passin pass:${private_key_password} -config intermediate/openssl.cnf \
   -new -sha256 -key intermediate/private/intermediate.key.pem \
   -out intermediate/csr/intermediate.csr.pem <<INPUT
 GB
@@ -59,7 +63,7 @@ Alice Ltd Intermediate CA
 
 INPUT
 
-openssl ca -passin pass:${password} -config openssl.cnf \
+openssl ca -passin pass:${private_key_password} -config openssl.cnf \
   -extensions v3_intermediate_ca -days 3650 -notext \
   -md sha256 -in intermediate/csr/intermediate.csr.pem \
   -out intermediate/certs/intermediate.cert.pem <<INPUT
@@ -75,13 +79,14 @@ function signCertificate() {
   common_name=${1}
   days=${2}
   cert_type=${3}
+  p12_password=${4}
 
   cd /root/ca
-  openssl genrsa -aes256 -passout pass:${password} -out intermediate/private/${common_name}.key.pem 2048
+  openssl genrsa -aes256 -passout pass:${private_key_password} -out intermediate/private/${common_name}.key.pem 2048
   chmod 400 intermediate/private/${common_name}.key.pem
 
   cd /root/ca
-  openssl req -passin pass:${password} -config intermediate/openssl.cnf \
+  openssl req -passin pass:${private_key_password} -config intermediate/openssl.cnf \
     -key intermediate/private/${common_name}.key.pem \
     -new -sha256 -out intermediate/csr/${common_name}.csr.pem <<INPUT
 US
@@ -94,7 +99,7 @@ ${common_name}
 INPUT
 
   cd /root/ca
-  openssl ca -passin pass:${password} -config intermediate/openssl.cnf \
+  openssl ca -passin pass:${private_key_password} -config intermediate/openssl.cnf \
     -extensions ${cert_type} -days ${days} -notext -md sha256 \
     -in intermediate/csr/${common_name}.csr.pem \
     -out intermediate/certs/${common_name}.cert.pem <<INPUT
@@ -107,14 +112,14 @@ INPUT
   openssl pkcs12 -export -out /root/work/${common_name}.p12 \
     -in /root/ca/intermediate/certs/${common_name}.cert.pem \
     -inkey /root/ca/intermediate/private/${common_name}.key.pem \
-    -passin pass:${password} -passout pass:${password}
+    -passin pass:${private_key_password} -passout pass:${p12_password}
 }
 
-signCertificate ${common_name_server} 1000 server_cert
-signCertificate ${common_name_client} 1000 usr_cert
+signCertificate ${server_common_name} 1000 server_cert ${server_p12_password}
+signCertificate ${client_common_name} 1000 usr_cert ${client_p12_password}
 
 # Generate P12 file for CA
 openssl pkcs12 -export -out /root/work/ca-chain.p12 \
   -in /root/ca/intermediate/certs/ca-chain.cert.pem \
   -inkey /root/ca/intermediate/private/intermediate.key.pem \
-  -passin pass:${password} -passout pass:${password}
+  -passin pass:${private_key_password} -passout pass:${cert_p12_password}
