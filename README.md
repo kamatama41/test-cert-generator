@@ -10,13 +10,12 @@ Each password for P12 files is `p@ssw0rd`.
 ```sh
 $ docker run --rm -v $(pwd)/work:/root/work kamatama41/test-cert-generator
 $ ls work
-ca-chain.p12    client.p12      example.com.p12
+ca-chain.cert.pem       client.p12              example.com.p12
 ```
 
 You can configure some parameters by following environment variables:
 - `PRIVATE_KEY_PASSWORD`: Master password for all private keys (default: `p@ssw0rd`)
 - `SERVER_COMMON_NAME`: Common name for the server cert (default: `example.com`)
-- `SERVER_P12_PASSWORD`: Password for P12 file of the server cert (default: `p@ssw0rd`)
+- `SERVER_P12_PASSWORD`: Password for P12 file of the server key pair (default: `p@ssw0rd`)
 - `CLIENT_COMMON_NAME`: Common name for the client cert (default: `client`)
-- `CLIENT_P12_PASSWORD`: Password for P12 file of the client cert (default: `p@ssw0rd`)
-- `CERT_P12_PASSWORD`: Password for P12 file of the private CA cert (default: `p@ssw0rd`)
+- `CLIENT_P12_PASSWORD`: Password for P12 file of the client key pair (default: `p@ssw0rd`)
