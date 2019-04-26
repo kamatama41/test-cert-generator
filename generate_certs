@@ -6,7 +6,6 @@
 set -eu
 
 private_key_password=${PRIVATE_KEY_PASSWORD:-p@ssw0rd}
-cert_p12_password=${CERT_P12_PASSWORD:-p@ssw0rd}
 server_p12_password=${SERVER_P12_PASSWORD:-p@ssw0rd}
 client_p12_password=${CLIENT_P12_PASSWORD:-p@ssw0rd}
 server_common_name=${SERVER_COMMON_NAME:-example.com}
@@ -40,7 +39,7 @@ chmod 444 certs/ca.cert.pem
 
 ## https://jamielinux.com/docs/openssl-certificate-authority/create-the-intermediate-pair.html
 cd /root/ca/intermediate
-mkdir certs crl csr newcerts private
+mkdir certs crl csr newcerts private p12
 chmod 700 private
 touch index.txt
 echo 1000 > serial
@@ -109,7 +108,7 @@ INPUT
   chmod 444 intermediate/certs/${common_name}.cert.pem
 
   # Generate P12 file
-  openssl pkcs12 -export -out /root/work/${common_name}.p12 \
+  openssl pkcs12 -export -out /root/ca/intermediate/p12/${common_name}.p12 \
     -in /root/ca/intermediate/certs/${common_name}.cert.pem \
     -inkey /root/ca/intermediate/private/${common_name}.key.pem \
     -passin pass:${private_key_password} -passout pass:${p12_password}
@@ -118,8 +117,5 @@ INPUT
 signCertificate ${server_common_name} 1000 server_cert ${server_p12_password}
 signCertificate ${client_common_name} 1000 usr_cert ${client_p12_password}
 
-# Generate P12 file for CA
-openssl pkcs12 -export -out /root/work/ca-chain.p12 \
-  -in /root/ca/intermediate/certs/ca-chain.cert.pem \
-  -inkey /root/ca/intermediate/private/intermediate.key.pem \
-  -passin pass:${private_key_password} -passout pass:${cert_p12_password}
+# Copy ca-chain and P12 files into working directory
+cp /root/ca/intermediate/p12/* /root/ca/intermediate/certs/ca-chain.cert.pem /root/work
