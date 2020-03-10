@@ -1,6 +1,6 @@
 # test-cert-generator
 
-Docker image to generate client/server certs. The certs are intended to be used for tests, so you should not apply them to actual applications.
+Docker image to generate self-signed client/server certs. The certs are intended to be used for tests, so you should not apply them to actual applications.
 
 ## Usage
 
