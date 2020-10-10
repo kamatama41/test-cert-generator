@@ -114,8 +114,8 @@ INPUT
     -passin pass:${private_key_password} -passout pass:${p12_password}
 }
 
-signCertificate ${server_common_name} 1000 server_cert ${server_p12_password}
-signCertificate ${client_common_name} 1000 usr_cert ${client_p12_password}
+signCertificate ${server_common_name} 3650 server_cert ${server_p12_password}
+signCertificate ${client_common_name} 3650 usr_cert ${client_p12_password}
 
 # Copy ca-chain and P12 files into working directory
 cp /root/ca/intermediate/p12/* /root/ca/intermediate/certs/ca-chain.cert.pem /root/work
