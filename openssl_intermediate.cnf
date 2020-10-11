@@ -30,6 +30,10 @@ default_md        = sha256
 
 name_opt          = ca_default
 cert_opt          = ca_default
+
+# Extension copying option: use with caution.
+copy_extensions   = copy
+
 default_days      = 375
 preserve          = no
 policy            = policy_loose
