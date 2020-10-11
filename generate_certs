@@ -84,9 +84,15 @@ function signCertificate() {
   openssl genrsa -aes256 -passout pass:${private_key_password} -out intermediate/private/${common_name}.key.pem 2048
   chmod 400 intermediate/private/${common_name}.key.pem
 
+  addext_opt=
+  if [ "${cert_type}" = "server_cert" ]; then
+    addext_opt="-addext 'subjectAltName = DNS:${common_name}'"
+  fi
+
   cd /root/ca
   openssl req -passin pass:${private_key_password} -config intermediate/openssl.cnf \
     -key intermediate/private/${common_name}.key.pem \
+    -addext "subjectAltName = DNS:${common_name}" \
     -new -sha256 -out intermediate/csr/${common_name}.csr.pem <<INPUT
 US
 California
@@ -114,8 +120,12 @@ INPUT
     -passin pass:${private_key_password} -passout pass:${p12_password}
 }
 
-signCertificate ${server_common_name} 1000 server_cert ${server_p12_password}
-signCertificate ${client_common_name} 1000 usr_cert ${client_p12_password}
+signCertificate ${server_common_name} 3650 server_cert ${server_p12_password}
+signCertificate ${client_common_name} 3650 usr_cert ${client_p12_password}
 
 # Copy ca-chain and P12 files into working directory
-cp /root/ca/intermediate/p12/* /root/ca/intermediate/certs/ca-chain.cert.pem /root/work
+cp /root/ca/intermediate/p12/* \
+  /root/ca/intermediate/certs/ca-chain.cert.pem \
+  /root/ca/intermediate/certs/${server_common_name}.cert.pem \
+  /root/ca/intermediate/certs/${client_common_name}.cert.pem \
+  /root/work
