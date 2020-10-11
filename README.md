@@ -4,13 +4,13 @@ Docker image to generate self-signed client/server certs. The certs are intended
 
 ## Usage
 
-Just run the container, so that 5 files will be generated on `/root/work` on the container.
+Just run the container, so that 7 files will be generated on `/root/work` on the container.
 Each password for P12 files is `p@ssw0rd`.
 
 ```sh
 $ docker run --rm -v $(pwd)/work:/root/work kamatama41/test-cert-generator
 $ ls work
-ca-chain.cert.pem       client.cert.pem         client.p12              example.com.cert.pem    example.com.p12
+ca-chain.cert.pem  client.cert.pem  client.key.pem  client.p12  example.com.cert.pem  example.com.key.pem  example.com.p12
 ```
 
 You can configure some parameters by following environment variables:

@@ -1,0 +1,15 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Docker image
+        run: make
+      - name: Test
+        run: docker run --rm -v $(pwd)/work:/root/work test-cert-generator
