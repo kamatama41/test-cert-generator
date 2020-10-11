@@ -11,3 +11,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build Docker image
         run: make
+      - name: Test
+        run: docker run --rm -v $(pwd)/work:/root/work test-cert-generator
