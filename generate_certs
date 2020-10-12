@@ -86,13 +86,13 @@ function signCertificate() {
 
   addext_opt=
   if [ "${cert_type}" = "server_cert" ]; then
-    addext_opt="-addext 'subjectAltName = DNS:${common_name}'"
+    addext_opt="-addext subjectAltName=DNS:${common_name}"
   fi
 
   cd /root/ca
   openssl req -passin pass:${private_key_password} -config intermediate/openssl.cnf \
     -key intermediate/private/${common_name}.key.pem \
-    -addext "subjectAltName = DNS:${common_name}" \
+    ${addext_opt} \
     -new -sha256 -out intermediate/csr/${common_name}.csr.pem <<INPUT
 US
 California
